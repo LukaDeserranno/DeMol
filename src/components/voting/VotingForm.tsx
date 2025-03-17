@@ -98,9 +98,11 @@ export default function VotingForm() {
         
         // Initialize votes object with 0 for each candidate
         const initialVotes: Record<string, number> = {};
-        currentRound.candidates.forEach(candidate => {
-          initialVotes[candidate.id] = 0;
-        });
+        if (currentRound.candidates && Array.isArray(currentRound.candidates)) {
+          currentRound.candidates.forEach((candidate: Candidate) => {
+            initialVotes[candidate.id] = 0;
+          });
+        }
         
         // Check if user has already voted in this round
         const voteDoc = await getDoc(doc(db, 'votes', `${currentUser.uid}_${currentRound.id}`));
@@ -110,7 +112,8 @@ export default function VotingForm() {
           setVotes(voteData.votes || initialVotes);
           
           // Calculate remaining points
-          const usedPoints = Object.values(voteData.votes || {}).reduce((sum: number, points: number) => sum + points, 0);
+          const voteValues = Object.values(voteData.votes || {});
+          const usedPoints = voteValues.reduce((sum: number, points: number) => sum + points, 0);
           setRemainingPoints(100 - usedPoints);
         } else {
           setVotes(initialVotes);
@@ -242,7 +245,7 @@ export default function VotingForm() {
                 </span>
               </div>
               
-              {round?.candidates.map((candidate) => (
+              {round?.candidates && Array.isArray(round.candidates) && round.candidates.map((candidate: Candidate) => (
                 <div key={candidate.id} className="flex flex-col space-y-1.5">
                   <Label htmlFor={`vote-${candidate.id}`}>{candidate.name}</Label>
                   <div className="flex items-center gap-2">
@@ -253,26 +256,24 @@ export default function VotingForm() {
                       max="100"
                       value={votes[candidate.id] || 0}
                       onChange={(e) => handleVoteChange(candidate.id, e.target.value)}
-                      disabled={submitting}
                       className="w-20"
                     />
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={votes[candidate.id] || 0}
-                      onChange={(e) => handleVoteChange(candidate.id, e.target.value)}
-                      disabled={submitting}
-                      className="flex-1"
-                    />
-                    <span className="w-10 text-right">{votes[candidate.id] || 0}%</span>
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full" 
+                        style={{ width: `${votes[candidate.id] || 0}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium w-8 text-right">
+                      {votes[candidate.id] || 0}%
+                    </span>
                   </div>
                 </div>
               ))}
-              
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              {success && <p className="text-sm text-green-500">{success}</p>}
             </div>
+            
+            {error && <p className="text-red-500 mt-4">{error}</p>}
+            {success && <p className="text-green-500 mt-4">{success}</p>}
           </CardContent>
           <CardFooter>
             <Button 
@@ -280,7 +281,7 @@ export default function VotingForm() {
               className="w-full" 
               disabled={submitting || remainingPoints !== 0}
             >
-              {submitting ? 'Saving...' : 'Submit Votes'}
+              {submitting ? 'Submitting...' : 'Submit Votes'}
             </Button>
           </CardFooter>
         </form>

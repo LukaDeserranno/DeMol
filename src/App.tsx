@@ -12,7 +12,7 @@ import GroupsList from './components/groups/GroupsList';
 import CreateGroup from './components/groups/CreateGroup';
 import GroupDetails from './components/groups/GroupDetails';
 import GroupInvite from './components/groups/GroupInvite';
-import VotingForm from './components/voting/VotingForm';
+// import VotingForm from './components/voting/VotingForm';
 import VotingResults from './components/voting/VotingResults';
 import RoundManager from './components/admin/RoundManager';
 import PointDistribution from './components/voting/PointDistribution';

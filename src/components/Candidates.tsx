@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { CANDIDATES } from '../models/Candidate';
 
