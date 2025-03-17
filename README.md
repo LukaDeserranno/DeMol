@@ -1,7 +1,7 @@
 # De Mol Voting App
 
 ## Projectbeschrijving
-Deze applicatie stelt gebruikers in staat om tijdens elke eliminatieronde van het tv-programma "De Mol" te stemmen op wie zij denken dat De Mol is. Gebruikers kunnen punten verdelen over de kandidaten, en degene die op het einde de meeste punten op De Mol heeft gezet, wint het spel. De applicatie maakt gebruik van React (met Vite) en Firebase (Firestore en Authentication) zonder traditionele backend.
+Deze applicatie stelt gebruikers in staat om tijdens elke eliminatieronde van het tv-programma "De Mol" te stemmen op wie zij denken dat De Mol is. Gebruikers kunnen punten verdelen over de kandidaten, en degene die op het einde de meeste punten op De Mol heeft gezet, wint het spel. De applicatie maakt gebruik van Typescript React (met Vite) en Firebase (Firestore en Authentication) zonder traditionele backend.
 
 ## Functionaliteiten
 - **Gebruikersauthenticatie**: Registreren en inloggen via Firebase Authentication.
