@@ -15,46 +15,59 @@ Deze applicatie stelt gebruikers in staat om tijdens elke eliminatieronde te ste
    ```sh
    yarn create vite de-mol-app --template react
    cd de-mol-app
-   yarn add firebase react-router-dom
+   yarn add firebase react-router-dom @radix-ui/react-icons class-variance-authority tailwind-variants lucide-react
    ```
 
-2. **Firebase instellen**
+2. **ChadCN instellen**
+   ```sh
+   npx shadcn-ui@latest init
+   ```
+   - Volg de setup-instructies en kies Tailwind CSS als styling-oplossing.
+   - Voeg componenten toe met:
+     ```sh
+     npx shadcn-ui@latest add button card input
+     ```
+
+3. **Firebase instellen**
    - Ga naar de Firebase Console en maak een nieuw project.
    - Voeg een webapp toe en kopieer de Firebase-configuratie.
    - Activeer Firestore Database en Authentication met e-mail/wachtwoord.
 
-3. **Firebase-configuratie in React (firebase.js)**
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+4. **Firebase-configuratie in React (firebase.js)**
+   ```javascript
+   import { initializeApp } from "firebase/app";
+   import { getAuth } from "firebase/auth";
+   import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCcf7vXG3jzJTfUaAbpE6KtZjcsn2Yf9hQ",
-  authDomain: "demol-99d6c.firebaseapp.com",
-  projectId: "demol-99d6c",
-  storageBucket: "demol-99d6c.firebasestorage.app",
-  messagingSenderId: "1098893515403",
-  appId: "1:1098893515403:web:edd5be4f87be1f65e9928e",
-  measurementId: "G-6JST25QZ72"
-};
+   const firebaseConfig = {
+     apiKey: "AIzaSyCcf7vXG3jzJTfUaAbpE6KtZjcsn2Yf9hQ",
+     authDomain: "demol-99d6c.firebaseapp.com",
+     projectId: "demol-99d6c",
+     storageBucket: "demol-99d6c.firebasestorage.app",
+     messagingSenderId: "1098893515403",
+     appId: "1:1098893515403:web:edd5be4f87be1f65e9928e",
+     measurementId: "G-6JST25QZ72"
+   };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+   const app = initializeApp(firebaseConfig);
+   const auth = getAuth(app);
+   const db = getFirestore(app);
+
+   export { auth, db };
+   ```
 
 ## Functionaliteiten implementeren
 ### 1. **Gebruikersauthenticatie**
-   - Maak SignUp en SignIn componenten voor gebruikersauthenticatie.
+   - Maak `SignUp` en `SignIn` componenten voor gebruikersauthenticatie.
    - Gebruik Firebase Authentication voor registratie en login.
+   - Gebruik ChadCN UI-componenten voor een modern design.
 
 ### 2. **Groepen aanmaken**
+   - Gebruikers kunnen een groep maken en leden uitnodigen.
+   - Groepsinformatie wordt opgeslagen in Firestore.
 
 ### 3. **Stemfunctionaliteit**
-   - Gebruikers kunnen punten toewijzen aan kandidaten per stemronde (100) punten per gebruiker kunnen verdeeld worden over de kandidaten.
+   - Gebruikers kunnen per stemronde 100 punten verdelen over de kandidaten.
    - Stemgegevens worden per groep en per ronde opgeslagen in Firestore.
    - Een weegfactor wordt toegepast op latere rondes voor puntentelling.
    - De stemronde sluit automatisch op zondag om 20:00, zodra de nieuwe aflevering begint.
@@ -62,8 +75,5 @@ const analytics = getAnalytics(app);
 ## UI en Routing
 - Gebruik React Router voor navigatie.
 - Creëer een overzicht van groepen en stemresultaten.
-- Gebruik de Kleuren/design die het echte molspel ook gebruikt (goplay)
-
-
----
-Dit README-bestand helpt bij de opzet en implementatie van de applicatie.
+- Gebruik ChadCN UI-componenten voor een moderne, strakke interface.
+- Pas de kleuren aan om te matchen met het design van De Mol (GoPlay).
