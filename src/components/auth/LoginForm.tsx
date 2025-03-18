@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
 import { Button } from '../ui/button';
@@ -11,8 +11,31 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const { signIn, currentUser } = useAuth();
   const navigate = useNavigate();
+
+  // Check for redirect URL in localStorage
+  useEffect(() => {
+    const savedRedirectUrl = localStorage.getItem('authRedirectUrl');
+    if (savedRedirectUrl) {
+      setRedirectUrl(savedRedirectUrl);
+    }
+
+    // If user is already logged in, handle redirect
+    if (currentUser && redirectUrl) {
+      handleRedirectAfterAuth();
+    }
+  }, [currentUser]);
+
+  const handleRedirectAfterAuth = () => {
+    if (redirectUrl) {
+      localStorage.removeItem('authRedirectUrl');
+      navigate(redirectUrl);
+    } else {
+      navigate('/');
+    }
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,7 +44,7 @@ export default function LoginForm() {
       setError('');
       setLoading(true);
       await signIn(email, password);
-      navigate('/');
+      handleRedirectAfterAuth();
     } catch (err: any) {
       console.error('Login error:', err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
@@ -62,10 +85,15 @@ export default function LoginForm() {
         </div>
         
         <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden">
-          <CardHeader className="p-6 space-y-1">
+          <CardHeader className="pb-6 space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Welkom terug</CardTitle>
             <CardDescription className="text-center text-gray-600">
               Log in bij je De Mol account
+              {redirectUrl && redirectUrl.includes('/invite/') && (
+                <p className="mt-2 text-sm text-red-600 font-medium">
+                  Log in om lid te worden van de groep
+                </p>
+              )}
             </CardDescription>
           </CardHeader>
           
