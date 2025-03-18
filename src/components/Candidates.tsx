@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { CANDIDATES } from '../models/Candidate';
 
 export default function Candidates() {
@@ -25,15 +25,7 @@ export default function Candidates() {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-        <Button 
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="self-start rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors gap-2"
-        >
-          <ArrowLeftIcon className="h-4 w-4" />
-          Terug naar Dashboard
-        </Button>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-end mb-8 gap-4">
         <div className="relative w-full md:w-72">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input 

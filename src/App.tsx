@@ -17,6 +17,14 @@ import VotingResults from './components/voting/VotingResults';
 import RoundManager from './components/admin/RoundManager';
 import PointDistribution from './components/voting/PointDistribution';
 import Candidates from './components/Candidates';
+import { Layout } from './components/layout/Layout';
+
+// Wrap the component with layout for protected routes
+const withLayout = (Component: React.ComponentType<any>) => (props: any) => (
+  <Layout>
+    <Component {...props} />
+  </Layout>
+);
 
 function App() {
   return (
@@ -30,22 +38,22 @@ function App() {
           <Route path="/firebase-config" element={<FirebaseConfigCheck />} />
           <Route path="/diagnostics" element={<FirebaseDiagnostics />} />
           
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute>{withLayout(Dashboard)({})}</ProtectedRoute>} />
+          <Route path="/candidates" element={<ProtectedRoute>{withLayout(Candidates)({})}</ProtectedRoute>} />
           
           {/* Group Routes */}
-          <Route path="/groups" element={<ProtectedRoute><GroupsList /></ProtectedRoute>} />
-          <Route path="/groups/create" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
-          <Route path="/groups/:groupId" element={<ProtectedRoute><GroupDetails /></ProtectedRoute>} />
-          <Route path="/invite/:groupId" element={<ProtectedRoute><GroupInvite /></ProtectedRoute>} />
+          <Route path="/groups" element={<ProtectedRoute>{withLayout(GroupsList)({})}</ProtectedRoute>} />
+          <Route path="/groups/create" element={<ProtectedRoute>{withLayout(CreateGroup)({})}</ProtectedRoute>} />
+          <Route path="/groups/:groupId" element={<ProtectedRoute>{withLayout(GroupDetails)({})}</ProtectedRoute>} />
+          <Route path="/invite/:groupId" element={<ProtectedRoute>{withLayout(GroupInvite)({})}</ProtectedRoute>} />
           
           {/* Voting Routes */}
-          <Route path="/vote" element={<ProtectedRoute><PointDistribution /></ProtectedRoute>} />
-          <Route path="/results" element={<ProtectedRoute><VotingResults /></ProtectedRoute>} />
-          <Route path="/points" element={<ProtectedRoute><PointDistribution /></ProtectedRoute>} />
+          <Route path="/vote" element={<ProtectedRoute>{withLayout(PointDistribution)({})}</ProtectedRoute>} />
+          <Route path="/results" element={<ProtectedRoute>{withLayout(VotingResults)({})}</ProtectedRoute>} />
+          <Route path="/points" element={<ProtectedRoute>{withLayout(PointDistribution)({})}</ProtectedRoute>} />
           
           {/* Admin Routes */}
-          <Route path="/admin/rounds" element={<ProtectedRoute><RoundManager /></ProtectedRoute>} />
+          <Route path="/admin/rounds" element={<ProtectedRoute>{withLayout(RoundManager)({})}</ProtectedRoute>} />
           
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
