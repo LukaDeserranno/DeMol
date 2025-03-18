@@ -166,8 +166,8 @@ export default function SignupForm() {
           />
         </div>
         
-        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden">
-          <CardHeader className="pb-6 space-y-1">
+        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden p-6">
+          <CardHeader className="p-6 space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Maak een account</CardTitle>
             <CardDescription className="text-center text-gray-600">
               Registreer je De Mol account
