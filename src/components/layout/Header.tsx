@@ -59,11 +59,7 @@ export function Header() {
             to="/"
             className="flex items-center space-x-2"
           >
-            <img src="/images/logo.png" alt="De Mol" className="h-8" onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://www.goplay.be/static/img/demol/logo.png';
-            }} />
-            <span className="font-bold text-xl hidden sm:inline-block text-red-600">De Mol</span>
+            <span className="font-bold text-xl sm:inline-block text-red-600">De Mol</span>
           </Link>
 
           {/* Desktop Navigation */}
