@@ -2,12 +2,22 @@ import {
   Loader2,
   LucideProps,
   type Icon as LucideIcon,
+  Plus,
+  Users,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export type Icon = typeof LucideIcon;
 
 export const Icons = {
   spinner: Loader2,
+  plus: Plus,
+  users: Users,
+  close: X,
+  arrowLeft: ChevronLeft,
+  arrowRight: ChevronRight,
   google: (props: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
