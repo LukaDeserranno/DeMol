@@ -49,15 +49,19 @@ export async function createGroup(
   // Get current user's display name
   const user = auth.currentUser;
   const displayName = user?.displayName || 'Anonymous';
-  const photoURL = user?.photoURL || undefined;
+  const photoURL = user?.photoURL || null;
   
   const member: GroupMember = {
     userId,
     displayName,
-    photoURL,
     role: 'admin',
     joinedAt: new Date()
   };
+  
+  // Add photoURL if it exists
+  if (photoURL) {
+    member.photoURL = photoURL;
+  }
   
   // Create base group data - omit description if undefined
   const groupData: any = {
@@ -67,12 +71,16 @@ export async function createGroup(
     members: [{
       userId,
       displayName,
-      photoURL,
       role: 'admin',
       joinedAt: Timestamp.now()
     }],
     inviteCode
   };
+  
+  // Add photoURL to the member in groupData if it exists
+  if (photoURL) {
+    groupData.members[0].photoURL = photoURL;
+  }
   
   // Only add description if it exists (avoid sending undefined to Firestore)
   if (description) {
@@ -183,7 +191,7 @@ export async function joinGroupWithCode(
   // Get current user's display name
   const user = auth.currentUser;
   const displayName = user?.displayName || 'Anonymous';
-  const photoURL = user?.photoURL || undefined;
+  const photoURL = user?.photoURL || null;
   
   const q = query(
     groupsCollection,
@@ -207,14 +215,20 @@ export async function joinGroupWithCode(
   }
   
   // Add the user as a member
-  const newMember = {
+  const newMember: any = {
     userId,
     displayName,
-    photoURL,
     role: 'member',
     // Use Timestamp.now() instead of serverTimestamp() inside arrays
     joinedAt: Timestamp.now()
   };
+  
+  // Only add photoURL if it exists
+  if (photoURL) {
+    newMember.photoURL = photoURL;
+  }
+  
+  console.log('Adding new member to group:', newMember);
   
   await updateDoc(doc(groupsCollection, groupDoc.id), {
     members: arrayUnion(newMember)

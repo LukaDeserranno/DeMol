@@ -119,16 +119,19 @@ function AdminVotingRoundsContent() {
       
       const roundData: Omit<VotingRound, 'id'> = {
         name,
-        description: description || undefined,
+        description: description.trim() || null,
         episodeNumber,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         isActive,
         status,
-        theme: theme || undefined,
-        eliminatedCandidateId: eliminatedCandidateId || undefined,
-        eliminationDate: eliminationDate ? new Date(eliminationDate) : undefined,
+        theme: theme.trim() || null,
+        eliminatedCandidateId: eliminatedCandidateId || null,
+        eliminationDate: eliminationDate ? new Date(eliminationDate) : null,
       };
+      
+      // Debug log
+      console.log('Submitting voting round data:', JSON.stringify(roundData));
       
       if (editingRound) {
         // Update existing round

@@ -207,20 +207,25 @@ export const createVotingRound = async (round: Omit<VotingRound, 'id'>): Promise
       await deactivateAllRounds();
     }
 
-    const roundData = {
+    // Create base data object
+    const roundData: any = {
       name: round.name,
-      description: round.description,
       startDate: round.startDate,
       endDate: round.endDate,
       isActive: round.isActive,
       episodeNumber: round.episodeNumber,
       status: round.status,
-      eliminatedCandidateId: round.eliminatedCandidateId,
-      eliminationDate: round.eliminationDate,
-      theme: round.theme,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
+    
+    // Only add optional fields if they exist and aren't null
+    if (round.description) roundData.description = round.description;
+    if (round.eliminatedCandidateId) roundData.eliminatedCandidateId = round.eliminatedCandidateId;
+    if (round.eliminationDate) roundData.eliminationDate = round.eliminationDate;
+    if (round.theme) roundData.theme = round.theme;
+    
+    console.log('Sending round data to Firestore:', roundData);
     
     const docRef = await addDoc(collection(db, ROUNDS_COLLECTION), roundData);
     return docRef.id;
@@ -247,16 +252,17 @@ export const updateVotingRound = async (roundId: string, updates: Partial<Voting
       updatedAt: serverTimestamp()
     };
     
+    // Only include fields that are not undefined
     if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.description !== undefined && updates.description !== null) updateData.description = updates.description;
     if (updates.startDate !== undefined) updateData.startDate = updates.startDate;
     if (updates.endDate !== undefined) updateData.endDate = updates.endDate;
     if (updates.isActive !== undefined) updateData.isActive = updates.isActive;
     if (updates.episodeNumber !== undefined) updateData.episodeNumber = updates.episodeNumber;
     if (updates.status !== undefined) updateData.status = updates.status;
-    if (updates.eliminatedCandidateId !== undefined) updateData.eliminatedCandidateId = updates.eliminatedCandidateId;
-    if (updates.eliminationDate !== undefined) updateData.eliminationDate = updates.eliminationDate;
-    if (updates.theme !== undefined) updateData.theme = updates.theme;
+    if (updates.eliminatedCandidateId !== undefined && updates.eliminatedCandidateId !== null) updateData.eliminatedCandidateId = updates.eliminatedCandidateId;
+    if (updates.eliminationDate !== undefined && updates.eliminationDate !== null) updateData.eliminationDate = updates.eliminationDate;
+    if (updates.theme !== undefined && updates.theme !== null) updateData.theme = updates.theme;
     
     await updateDoc(roundRef, updateData);
   } catch (error) {
