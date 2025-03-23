@@ -58,12 +58,24 @@ module.exports = {
         scrollX: {
           from: { transform: 'translateX(0)' },
           to: { transform: 'translateX(-50%)' },
+        },
+        "bounce-mini": {
+          "0%, 100%": { transform: "translateY(-5%)" },
+          "50%": { transform: "translateY(0)" }
+        },
+        "ping-mini": {
+          "75%, 100%": {
+            transform: "scale(1.1)",
+            opacity: "0.7"
+          }
         }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "scrollX": "scrollX 30s linear infinite",
+        "bounce-mini": "bounce-mini 0.5s ease-in-out",
+        "ping-mini": "ping-mini 1s cubic-bezier(0, 0, 0.2, 1)"
       },
     },
   },

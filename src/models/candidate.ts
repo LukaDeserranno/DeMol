@@ -5,4 +5,5 @@ export interface Candidate {
   bio: string;
   eliminated: boolean;
   image: string;
+  occupation?: string;
 } 
