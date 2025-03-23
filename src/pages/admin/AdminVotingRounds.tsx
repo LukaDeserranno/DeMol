@@ -217,7 +217,7 @@ function AdminVotingRoundsContent() {
   };
   
   // Get eliminated candidate name
-  const getEliminatedCandidateName = (candidateId: string | undefined) => {
+  const getEliminatedCandidateName = (candidateId: string | null | undefined): string => {
     if (!candidateId) return 'Niemand';
     const candidate = candidates.find(c => c.id === candidateId);
     return candidate ? candidate.name : 'Onbekend';
