@@ -1,16 +1,17 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
-  getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   User as FirebaseUser,
   updateProfile
 } from 'firebase/auth';
-import { app } from '../firebase/config';
+import { app, auth } from '../firebase/config';
 import { User, AuthState } from '../models/user';
 import { createOrUpdateUser, getUserById } from '../firebase/userService';
 
@@ -31,7 +32,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     error: null,
   });
 
-  const auth = getAuth(app);
+  // Check for redirect result on page load
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("Redirect auth successful");
+        }
+      } catch (error) {
+        console.error("Redirect auth error:", error);
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
@@ -92,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -145,12 +160,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      
+      // Add scopes if needed
+      provider.addScope('profile');
+      provider.addScope('email');
+
+      // Set custom parameters
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        // Include the hosting domain to improve compatibility with Vercel
+        hosting_domain: window.location.hostname
+      });
+
+      // Detect mobile devices
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      // Log information for debugging
+      console.log('Auth attempt:', {
+        domain: window.location.hostname,
+        isMobile,
+        provider: 'Google',
+        mode: isMobile ? 'redirect' : 'popup'
+      });
+      
+      if (isMobile) {
+        // Use redirect method for mobile
+        console.log("Using redirect auth for mobile");
+        await signInWithRedirect(auth, provider);
+      } else {
+        // Use popup for desktop
+        console.log("Using popup auth for desktop");
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (popupError) {
+          console.error("Popup error:", popupError);
+          // If popup fails (e.g., popup blocked), fall back to redirect
+          console.log("Falling back to redirect auth after popup failure");
+          await signInWithRedirect(auth, provider);
+        }
+      }
     } catch (error) {
+      console.error('Google sign in error:', error);
+      // Include more details in the error message
+      const errorDetails = error instanceof Error ? 
+        `${error.message} (${(error as any).code || 'unknown'})` : 
+        'Unknown error';
+      
       setState(prev => ({
         ...prev,
         loading: false,
-        error: (error as Error).message,
+        error: `Authentication failed: ${errorDetails}`
       }));
       throw error;
     }

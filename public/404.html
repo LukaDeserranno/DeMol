@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+  <script>
+    // Single Page Apps for GitHub Pages/Vercel
+    // MIT License
+    // Modified version of https://github.com/rafgraph/spa-github-pages
+    (function() {
+      // This script takes the current URL and converts the path and query
+      // string into just a query string, and then redirects the browser
+      // to the new URL with only a query string and hash fragment
+      
+      var pathSegmentsToKeep = 0;
+      var l = window.location;
+      
+      // Save the URL to localStorage
+      localStorage.setItem('redirectPath', l.pathname + l.search + l.hash);
+      
+      // Redirect to the index.html page with the route in the query parameter
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        '/?redirect=true'
+      );
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to homepage...</p>
+</body>
+</html> 

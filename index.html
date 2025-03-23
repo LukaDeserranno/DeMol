@@ -4,7 +4,20 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>De Mol</title>
+    <!-- Handle SPA routing redirect -->
+    <script>
+      (function() {
+        // Check for redirect from 404 page
+        if (window.location.search.includes('redirect=true')) {
+          var savedPath = localStorage.getItem('redirectPath');
+          if (savedPath) {
+            localStorage.removeItem('redirectPath');
+            window.history.replaceState(null, null, savedPath);
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

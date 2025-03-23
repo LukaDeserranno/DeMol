@@ -10,6 +10,22 @@ import { AdminRoute } from './components/auth/AdminRoute';
 import GroupsPage from './pages/groups';
 import GroupDetailPage from './pages/groups/[id]';
 import { ToastProvider } from './components/ui/toast';
+import { useEffect } from 'react';
+
+// This component fixes navigation issues with Vercel deployments
+function NavigationFix() {
+  useEffect(() => {
+    // Log navigation for debugging
+    const logNavigation = () => {
+      console.log('Navigation occurred:', window.location.pathname);
+    };
+
+    window.addEventListener('popstate', logNavigation);
+    return () => window.removeEventListener('popstate', logNavigation);
+  }, []);
+
+  return null;
+}
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -35,6 +51,7 @@ function App() {
   return (
     <ToastProvider>
       <Router>
+          <NavigationFix />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
