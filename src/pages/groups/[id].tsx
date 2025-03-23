@@ -24,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
-import { Copy, ChevronLeft, ClipboardCopy, Calendar, Users, LogOut, Trophy, TrendingDown, Star } from 'lucide-react';
+import { Copy, ChevronLeft, ClipboardCopy, Calendar, Users, LogOut, Trophy, TrendingDown, Star, BarChart } from 'lucide-react';
 
 // Create placeholder components for missing UI components
 interface AvatarProps {
@@ -525,6 +525,141 @@ const GroupDetailPage = () => {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            <Card className="md:col-span-2 bg-black border border-white/10 backdrop-blur-sm shadow-[0_0_25px_rgba(0,0,0,0.3)] group hover:border-[#2A9D8F]/30 transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#2A9D8F]/5 to-transparent opacity-70"></div>
+              <div className="h-2 bg-gradient-to-r from-[#2A9D8F]/80 to-[#2A9D8F]/20 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+              <CardHeader className="border-b border-white/10 relative z-10">
+                <div className="flex items-center gap-2">
+                  <BarChart size={20} className="text-white" />
+                  <div>
+                    <CardTitle className="text-white text-xl">Member Voting Distribution</CardTitle>
+                    <CardDescription className="text-white">
+                      How each member distributed their 100 points
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6 relative z-10">
+                {groupStats.memberVotes.length === 0 ? (
+                  <p className="text-white">No member votes recorded yet</p>
+                ) : (
+                  <div>
+                    {groupStats.memberVotes.filter(mv => Object.keys(mv.votes).length > 0).length === 0 ? (
+                      <div className="p-6 border border-dashed border-white/20 rounded-lg text-center">
+                        <BarChart size={32} className="mx-auto mb-3 text-white/40" />
+                        <p className="text-white">No member votes have been recorded yet.</p>
+                        <p className="text-white/60 text-sm mt-1">
+                          Vote data will appear here once members start voting in rounds.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {groupStats.memberVotes.map((memberVote) => {
+                          // Skip members with no votes
+                          if (Object.keys(memberVote.votes).length === 0) {
+                            return null;
+                          }
+                          
+                          // Find the member
+                          const member = group.members.find(m => m.userId === memberVote.userId);
+                          if (!member) return null;
+                          
+                          // Sort candidates by points
+                          const sortedVotes = Object.entries(memberVote.votes)
+                            .map(([candidateId, points]) => ({
+                              candidateId,
+                              points,
+                              candidateName: candidates.find(c => c.id === candidateId)?.name || 'Unknown'
+                            }))
+                            .sort((a, b) => b.points - a.points);
+                          
+                          // Only show top 3 votes and combine the rest
+                          const topVotes = sortedVotes.slice(0, 3);
+                          const otherVotes = sortedVotes.slice(3);
+                          const otherPoints = otherVotes.reduce((sum, vote) => sum + vote.points, 0);
+                          
+                          // Calculate total (should be 100, but just in case)
+                          const totalPoints = sortedVotes.reduce((sum, vote) => sum + vote.points, 0) || 100;
+                          
+                          return (
+                            <div key={memberVote.userId} className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Avatar className="h-8 w-8 border border-white/10">
+                                  {member.photoURL ? (
+                                    <AvatarImage src={member.photoURL} />
+                                  ) : null}
+                                  <AvatarFallback>{member.displayName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-white font-medium text-sm">{member.displayName}</span>
+                              </div>
+                              
+                              {topVotes.length > 0 ? (
+                                <div className="mt-2">
+                                  <div className="flex w-full h-5 rounded-full overflow-hidden bg-white/10">
+                                    {topVotes.map((vote, i) => (
+                                      <div 
+                                        key={vote.candidateId}
+                                        className="h-full flex justify-center items-center text-xs font-medium text-white"
+                                        style={{ 
+                                          width: `${Math.round((vote.points / totalPoints) * 100)}%`,
+                                          backgroundColor: i === 0 ? '#2A9D8F' : i === 1 ? '#2A9D8F99' : '#2A9D8F66',
+                                        }}
+                                        title={`${vote.candidateName}: ${vote.points} points`}
+                                      >
+                                        {vote.points}
+                                      </div>
+                                    ))}
+                                    {otherPoints > 0 && (
+                                      <div 
+                                        className="h-full flex justify-center items-center text-xs font-medium text-white bg-white/30"
+                                        style={{ 
+                                          width: `${Math.round((otherPoints / totalPoints) * 100)}%`
+                                        }}
+                                        title={`Other candidates: ${otherPoints} points`}
+                                      >
+                                        {otherPoints > 5 ? otherPoints : ''}
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex text-xs mt-1 px-1">
+                                    {topVotes.map((vote) => (
+                                      <div 
+                                        key={vote.candidateId} 
+                                        className="overflow-hidden whitespace-nowrap text-ellipsis"
+                                        style={{ width: `${Math.round((vote.points / totalPoints) * 100)}%` }}
+                                        title={vote.candidateName}
+                                      >
+                                        <span className="text-white">
+                                          {vote.candidateName.length > 10 
+                                            ? vote.candidateName.substring(0, 8) + '...' 
+                                            : vote.candidateName}
+                                        </span>
+                                      </div>
+                                    ))}
+                                    {otherPoints > 0 && (
+                                      <div 
+                                        className="overflow-hidden whitespace-nowrap text-ellipsis"
+                                        style={{ width: `${Math.round((otherPoints / totalPoints) * 100)}%` }}
+                                      >
+                                        <span className="text-white opacity-70">Other</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-white/60 text-xs">No votes recorded</p>
+                              )}
+                            </div>
+                          );
+                        }).filter(Boolean)}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
