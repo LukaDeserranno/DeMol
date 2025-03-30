@@ -406,7 +406,7 @@ const GroupDetailPage = () => {
                   <Trophy size={20} className="text-white" />
                   <div>
                     <CardTitle className="text-white text-xl">Top Suspects</CardTitle>
-                    <CardDescription className="text-white">Who the group thinks is De Mol</CardDescription>
+                    <CardDescription className="text-white">Percentage of total votes received</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -431,8 +431,8 @@ const GroupDetailPage = () => {
                           <span className="text-white font-medium">{suspect.candidateName}</span>
                         </div>
                         <div className="flex items-center bg-[#2A9D8F]/20 text-white px-4 py-1.5 rounded-full text-sm border border-[#2A9D8F]/30 shadow-[0_0_10px_rgba(42,157,143,0.05)]">
-                          <span className="font-bold">{suspect.totalPoints}</span>
-                          <span className="ml-1 text-white">pts</span>
+                          <span className="font-bold">{suspect.percentage}%</span>
+                          <span className="ml-1 text-white">of votes</span>
                         </div>
                       </div>
                     ))}
@@ -449,7 +449,7 @@ const GroupDetailPage = () => {
                   <TrendingDown size={20} className="text-white" />
                   <div>
                     <CardTitle className="text-white text-xl">Least Suspected</CardTitle>
-                    <CardDescription className="text-white">Who the group thinks is not De Mol</CardDescription>
+                    <CardDescription className="text-white">Percentage of total votes received</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -474,8 +474,8 @@ const GroupDetailPage = () => {
                           <span className="text-white font-medium">{suspect.candidateName}</span>
                         </div>
                         <div className="flex items-center bg-[#2A9D8F]/20 text-white px-4 py-1.5 rounded-full text-sm border border-[#2A9D8F]/30 shadow-[0_0_10px_rgba(42,157,143,0.05)]">
-                          <span className="font-bold">{suspect.totalPoints}</span>
-                          <span className="ml-1 text-white">pts</span>
+                          <span className="font-bold">{suspect.percentage}%</span>
+                          <span className="ml-1 text-white">of votes</span>
                         </div>
                       </div>
                     ))}
