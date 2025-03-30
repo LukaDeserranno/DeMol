@@ -763,18 +763,42 @@ const GroupDetailPage = () => {
                               Top Suspects This Round
                             </h4>
                             <div className="space-y-2">
-                              {/* In a real implementation, you would map through round-specific voting data */}
-                              {groupStats.topSuspects.slice(0, 3).map((suspect, index) => (
-                                <div key={`${round.roundId}-${suspect.candidateId}`} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all">
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#2A9D8F]/20 text-white border border-[#2A9D8F]/30">
-                                      <span className="font-medium text-xs">{index + 1}</span>
+                              {(() => {
+                                // Get all votes for this round
+                                const roundVotes = groupStats.memberVotes.reduce((acc, memberVote) => {
+                                  const votes = memberVote.roundVotes[round.roundId] || {};
+                                  Object.entries(votes).forEach(([candidateId, points]) => {
+                                    acc[candidateId] = (acc[candidateId] || 0) + points;
+                                  });
+                                  return acc;
+                                }, {} as Record<string, number>);
+
+                                // Convert to array and sort
+                                const sortedVotes = Object.entries(roundVotes)
+                                  .map(([candidateId, points]) => ({
+                                    candidateId,
+                                    points,
+                                    candidateName: candidates.find(c => c.id === candidateId)?.name || 'Unknown'
+                                  }))
+                                  .sort((a, b) => b.points - a.points)
+                                  .slice(0, 3);
+
+                                const totalPoints = sortedVotes.reduce((sum, vote) => sum + vote.points, 0);
+
+                                return sortedVotes.map((suspect, index) => (
+                                  <div key={`${round.roundId}-${suspect.candidateId}`} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all">
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#2A9D8F]/20 text-white border border-[#2A9D8F]/30">
+                                        <span className="font-medium text-xs">{index + 1}</span>
+                                      </div>
+                                      <span className="text-white">{suspect.candidateName}</span>
                                     </div>
-                                    <span className="text-white">{suspect.candidateName}</span>
+                                    <div className="text-white text-sm">
+                                      {Math.round((suspect.points / totalPoints) * 100)}% votes
+                                    </div>
                                   </div>
-                                  <div className="text-white text-sm">{Math.min(100, Math.round((suspect.totalPoints / (groupStats.topSuspects.reduce((sum, s) => sum + s.totalPoints, 0))) * 100))}% votes</div>
-                                </div>
-                              ))}
+                                ));
+                              })()}
                             </div>
                           </div>
                           
@@ -784,18 +808,42 @@ const GroupDetailPage = () => {
                               Least Suspected This Round
                             </h4>
                             <div className="space-y-2">
-                              {/* In a real implementation, you would map through round-specific voting data */}
-                              {groupStats.leastSuspects.slice(0, 3).map((suspect, index) => (
-                                <div key={`${round.roundId}-${suspect.candidateId}`} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all">
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#2A9D8F]/20 text-white border border-[#2A9D8F]/30">
-                                      <span className="font-medium text-xs">{index + 1}</span>
+                              {(() => {
+                                // Get all votes for this round
+                                const roundVotes = groupStats.memberVotes.reduce((acc, memberVote) => {
+                                  const votes = memberVote.roundVotes[round.roundId] || {};
+                                  Object.entries(votes).forEach(([candidateId, points]) => {
+                                    acc[candidateId] = (acc[candidateId] || 0) + points;
+                                  });
+                                  return acc;
+                                }, {} as Record<string, number>);
+
+                                // Convert to array and sort
+                                const sortedVotes = Object.entries(roundVotes)
+                                  .map(([candidateId, points]) => ({
+                                    candidateId,
+                                    points,
+                                    candidateName: candidates.find(c => c.id === candidateId)?.name || 'Unknown'
+                                  }))
+                                  .sort((a, b) => a.points - b.points)
+                                  .slice(0, 3);
+
+                                const totalPoints = sortedVotes.reduce((sum, vote) => sum + vote.points, 0);
+
+                                return sortedVotes.map((suspect, index) => (
+                                  <div key={`${round.roundId}-${suspect.candidateId}`} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all">
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#2A9D8F]/20 text-white border border-[#2A9D8F]/30">
+                                        <span className="font-medium text-xs">{index + 1}</span>
+                                      </div>
+                                      <span className="text-white">{suspect.candidateName}</span>
                                     </div>
-                                    <span className="text-white">{suspect.candidateName}</span>
+                                    <div className="text-white text-sm">
+                                      {Math.round((suspect.points / totalPoints) * 100)}% votes
+                                    </div>
                                   </div>
-                                  <div className="text-white text-sm">{Math.min(100, Math.round((suspect.totalPoints / (groupStats.leastSuspects.reduce((sum, s) => sum + s.totalPoints, 0))) * 100))}% votes</div>
-                                </div>
-                              ))}
+                                ));
+                              })()}
                             </div>
                           </div>
                         </div>
