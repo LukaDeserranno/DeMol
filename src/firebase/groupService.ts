@@ -440,7 +440,17 @@ export async function getGroupStats(groupId: string, activeCandidates: Candidate
     
     // Calculate member votes - use the most recent vote for each member
     const memberVotes = memberVotesResults.map(({ member, votes }) => {
-      // Find most recent vote
+      // Create a map of votes by round
+      const roundVotes: Record<string, Record<string, number>> = {};
+      
+      // Process all votes for this member
+      votes.forEach(vote => {
+        if (vote.candidateVotes) {
+          roundVotes[vote.roundId] = vote.candidateVotes;
+        }
+      });
+      
+      // Find most recent vote for total votes
       const latestVote = votes.length > 0 
         ? votes.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0] 
         : null;
@@ -449,7 +459,8 @@ export async function getGroupStats(groupId: string, activeCandidates: Candidate
         return {
           userId: member.userId,
           displayName: member.displayName,
-          votes: latestVote.candidateVotes
+          votes: latestVote.candidateVotes,
+          roundVotes
         };
       } else {
         // No votes - return zero for all candidates
@@ -459,7 +470,8 @@ export async function getGroupStats(groupId: string, activeCandidates: Candidate
           votes: activeCandidates.reduce((acc, c) => {
             acc[c.id] = 0;
             return acc;
-          }, {} as Record<string, number>)
+          }, {} as Record<string, number>),
+          roundVotes: {}
         };
       }
     });

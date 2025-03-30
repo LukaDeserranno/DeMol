@@ -91,6 +91,7 @@ const GroupDetailPage = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<'admin' | 'member' | null>(null);
   const [activeTab, setActiveTab] = useState('stats');
+  const [selectedRound, setSelectedRound] = useState('all');
   
   useEffect(() => {
     if (user) {
@@ -558,106 +559,146 @@ const GroupDetailPage = () => {
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {groupStats.memberVotes.map((memberVote) => {
-                          // Skip members with no votes
-                          if (Object.keys(memberVote.votes).length === 0) {
-                            return null;
-                          }
-                          
-                          // Find the member
-                          const member = group.members.find(m => m.userId === memberVote.userId);
-                          if (!member) return null;
-                          
-                          // Sort candidates by points
-                          const sortedVotes = Object.entries(memberVote.votes)
-                            .map(([candidateId, points]) => ({
-                              candidateId,
-                              points,
-                              candidateName: candidates.find(c => c.id === candidateId)?.name || 'Unknown'
-                            }))
-                            .sort((a, b) => b.points - a.points);
-                          
-                          // Only show top 3 votes and combine the rest
-                          const topVotes = sortedVotes.slice(0, 3);
-                          const otherVotes = sortedVotes.slice(3);
-                          const otherPoints = otherVotes.reduce((sum, vote) => sum + vote.points, 0);
-                          
-                          // Calculate total (should be 100, but just in case)
-                          const totalPoints = sortedVotes.reduce((sum, vote) => sum + vote.points, 0) || 100;
-                          
-                          return (
-                            <div key={memberVote.userId} className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Avatar className="h-8 w-8 border border-white/10">
-                                  {member.photoURL ? (
-                                    <AvatarImage src={member.photoURL} />
-                                  ) : null}
-                                  <AvatarFallback>{member.displayName.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-white font-medium text-sm">{member.displayName}</span>
-                              </div>
-                              
-                              {topVotes.length > 0 ? (
-                                <div className="mt-2">
-                                  <div className="flex w-full h-5 rounded-full overflow-hidden bg-white/10">
-                                    {topVotes.map((vote, i) => (
-                                      <div 
-                                        key={vote.candidateId}
-                                        className="h-full flex justify-center items-center text-xs font-medium text-white"
-                                        style={{ 
-                                          width: `${Math.round((vote.points / totalPoints) * 100)}%`,
-                                          backgroundColor: i === 0 ? '#2A9D8F' : i === 1 ? '#2A9D8F99' : '#2A9D8F66',
-                                        }}
-                                        title={`${vote.candidateName}: ${vote.points} points`}
-                                      >
-                                        {vote.points}
-                                      </div>
-                                    ))}
-                                    {otherPoints > 0 && (
-                                      <div 
-                                        className="h-full flex justify-center items-center text-xs font-medium text-white bg-white/30"
-                                        style={{ 
-                                          width: `${Math.round((otherPoints / totalPoints) * 100)}%`
-                                        }}
-                                        title={`Other candidates: ${otherPoints} points`}
-                                      >
-                                        {otherPoints > 5 ? otherPoints : ''}
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="flex text-xs mt-1 px-1">
-                                    {topVotes.map((vote) => (
-                                      <div 
-                                        key={vote.candidateId} 
-                                        className="overflow-hidden whitespace-nowrap text-ellipsis"
-                                        style={{ width: `${Math.round((vote.points / totalPoints) * 100)}%` }}
-                                        title={vote.candidateName}
-                                      >
-                                        <span className="text-white">
-                                          {vote.candidateName.length > 10 
-                                            ? vote.candidateName.substring(0, 8) + '...' 
-                                            : vote.candidateName}
-                                        </span>
-                                      </div>
-                                    ))}
-                                    {otherPoints > 0 && (
-                                      <div 
-                                        className="overflow-hidden whitespace-nowrap text-ellipsis"
-                                        style={{ width: `${Math.round((otherPoints / totalPoints) * 100)}%` }}
-                                      >
-                                        <span className="text-white opacity-70">Other</span>
-                                      </div>
-                                    )}
-                                  </div>
+                      <div className="space-y-6">
+                        {/* Round Selection */}
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedRound('all')}
+                            className={`border-white/20 hover:border-primary/50 text-white bg-white/5 hover:bg-primary/10 ${
+                              selectedRound === 'all' ? 'bg-[#2A9D8F]/20 border-[#2A9D8F]/40' : ''
+                            }`}
+                          >
+                            All Rounds
+                          </Button>
+                          {groupStats.roundParticipation.map((round) => (
+                            <Button
+                              key={round.roundId}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedRound(round.roundId)}
+                              className={`border-white/20 hover:border-primary/50 text-white bg-white/5 hover:bg-primary/10 ${
+                                selectedRound === round.roundId ? 'bg-[#2A9D8F]/20 border-[#2A9D8F]/40' : ''
+                              }`}
+                            >
+                              {round.roundName}
+                            </Button>
+                          ))}
+                        </div>
+
+                        {/* Member Votes Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {groupStats.memberVotes.map((memberVote) => {
+                            // Skip members with no votes
+                            if (Object.keys(memberVote.votes).length === 0) {
+                              return null;
+                            }
+                            
+                            // Find the member
+                            const member = group.members.find(m => m.userId === memberVote.userId);
+                            if (!member) return null;
+                            
+                            // Get votes for selected round or all rounds
+                            const votes = selectedRound === 'all' 
+                              ? Object.values(memberVote.roundVotes).reduce((acc, roundVotes) => {
+                                  Object.entries(roundVotes).forEach(([candidateId, points]) => {
+                                    acc[candidateId] = (acc[candidateId] || 0) + points;
+                                  });
+                                  return acc;
+                                }, {} as Record<string, number>)
+                              : memberVote.roundVotes?.[selectedRound] || {};
+                            
+                            // Sort candidates by points
+                            const sortedVotes = Object.entries(votes)
+                              .map(([candidateId, points]) => ({
+                                candidateId,
+                                points,
+                                candidateName: candidates.find(c => c.id === candidateId)?.name || 'Unknown'
+                              }))
+                              .sort((a, b) => b.points - a.points);
+                            
+                            // Only show top 3 votes and combine the rest
+                            const topVotes = sortedVotes.slice(0, 3);
+                            const otherVotes = sortedVotes.slice(3);
+                            const otherPoints = otherVotes.reduce((sum, vote) => sum + vote.points, 0);
+                            
+                            // Calculate total (should be 100 * number of rounds, but just in case)
+                            const totalPoints = sortedVotes.reduce((sum, vote) => sum + vote.points, 0) || 100;
+                            
+                            return (
+                              <div key={memberVote.userId} className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Avatar className="h-8 w-8 border border-white/10">
+                                    {member.photoURL ? (
+                                      <AvatarImage src={member.photoURL} />
+                                    ) : null}
+                                    <AvatarFallback>{member.displayName.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-white font-medium text-sm">{member.displayName}</span>
                                 </div>
-                              ) : (
-                                <p className="text-white/60 text-xs">No votes recorded</p>
-                              )}
-                            </div>
-                          );
-                        }).filter(Boolean)}
+                                
+                                {topVotes.length > 0 ? (
+                                  <div className="mt-2">
+                                    <div className="flex w-full h-5 rounded-full overflow-hidden bg-white/10">
+                                      {topVotes.map((vote, i) => (
+                                        <div 
+                                          key={vote.candidateId}
+                                          className="h-full flex justify-center items-center text-xs font-medium text-white"
+                                          style={{ 
+                                            width: `${Math.round((vote.points / totalPoints) * 100)}%`,
+                                            backgroundColor: i === 0 ? '#2A9D8F' : i === 1 ? '#2A9D8F99' : '#2A9D8F66',
+                                          }}
+                                          title={`${vote.candidateName}: ${vote.points} points`}
+                                        >
+                                          {vote.points}
+                                        </div>
+                                      ))}
+                                      {otherPoints > 0 && (
+                                        <div 
+                                          className="h-full flex justify-center items-center text-xs font-medium text-white bg-white/30"
+                                          style={{ 
+                                            width: `${Math.round((otherPoints / totalPoints) * 100)}%`
+                                          }}
+                                          title={`Other candidates: ${otherPoints} points`}
+                                        >
+                                          {otherPoints > 5 ? otherPoints : ''}
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="flex text-xs mt-1 px-1">
+                                      {topVotes.map((vote) => (
+                                        <div 
+                                          key={vote.candidateId} 
+                                          className="overflow-hidden whitespace-nowrap text-ellipsis"
+                                          style={{ width: `${Math.round((vote.points / totalPoints) * 100)}%` }}
+                                          title={vote.candidateName}
+                                        >
+                                          <span className="text-white">
+                                            {vote.candidateName.length > 10 
+                                              ? vote.candidateName.substring(0, 8) + '...' 
+                                              : vote.candidateName}
+                                          </span>
+                                        </div>
+                                      ))}
+                                      {otherPoints > 0 && (
+                                        <div 
+                                          className="overflow-hidden whitespace-nowrap text-ellipsis"
+                                          style={{ width: `${Math.round((otherPoints / totalPoints) * 100)}%` }}
+                                        >
+                                          <span className="text-white opacity-70">Other</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-white/60 text-xs">No votes recorded</p>
+                                )}
+                              </div>
+                            );
+                          }).filter(Boolean)}
+                        </div>
                       </div>
                     )}
                   </div>

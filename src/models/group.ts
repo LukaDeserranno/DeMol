@@ -20,6 +20,7 @@ export interface MemberVote {
   userId: string;
   displayName: string;
   votes: Record<string, number>; // candidateId -> total points
+  roundVotes: Record<string, Record<string, number>>; // roundId -> candidateId -> points
 }
 
 export interface RoundParticipation {
