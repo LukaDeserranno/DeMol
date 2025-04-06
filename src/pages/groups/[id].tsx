@@ -163,7 +163,8 @@ const GroupDetailPage = () => {
             memberVotes: groupData.members.map(m => ({
               userId: m.userId,
               displayName: m.displayName,
-              votes: {}
+              votes: {},
+              roundVotes: {}
             })),
             roundParticipation: [1, 2, 3].map(i => ({
               roundId: `round-${i}`,
