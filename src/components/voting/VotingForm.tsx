@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Candidate } from '@/models/candidate';
 import { Vote, VotingRound } from '@/models/vote';
 import { VotingSlider } from './VotingSlider';
-import { getActiveCandidates, getAllCandidates } from '@/firebase/candidateService';
+import { getAllCandidates } from '@/firebase/candidateService';
 import { getActiveVotingRound, getUserVoteForRound, submitVote } from '@/firebase/votingService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
@@ -29,21 +29,21 @@ export function VotingForm({ userId }: VotingFormProps) {
         setIsLoading(true);
         setError(null);
         
-        // Get active candidates
-        const activeCandidates = await getAllCandidates();
-        setCandidates(activeCandidates);
-        
-        // Initialize votes with 0 points for each candidate
-        const initialVotes: Record<string, number> = {};
-        activeCandidates.forEach(candidate => {
-          initialVotes[candidate.id] = 0;
-        });
+        // Get all candidates
+        const allCandidates = await getAllCandidates();
+        setCandidates(allCandidates);
         
         // Get active voting round
         const round = await getActiveVotingRound();
         setCurrentRound(round);
         
         if (round && userId) {
+          // Initialize votes with 0 points for each candidate
+          const initialVotes: Record<string, number> = {};
+          allCandidates.forEach(candidate => {
+            initialVotes[candidate.id] = 0;
+          });
+          
           // Check if user already voted in this round
           const existingVote = await getUserVoteForRound(userId, round.id);
           
@@ -63,6 +63,10 @@ export function VotingForm({ userId }: VotingFormProps) {
           }
         } else {
           // No active round, use initial votes
+          const initialVotes: Record<string, number> = {};
+          allCandidates.forEach(candidate => {
+            initialVotes[candidate.id] = 0;
+          });
           setVotes(initialVotes);
           setHasExistingVote(false);
           setRemainingPoints(100);
@@ -120,13 +124,24 @@ export function VotingForm({ userId }: VotingFormProps) {
   const handleDistributeEvenly = () => {
     if (candidates.length === 0) return;
     
-    const pointsPerCandidate = Math.floor(100 / candidates.length);
-    const remainder = 100 % candidates.length;
+    // Only distribute points to non-eliminated candidates
+    const activeCandidates = candidates.filter(candidate => !candidate.eliminated);
+    if (activeCandidates.length === 0) return;
+    
+    const pointsPerCandidate = Math.floor(100 / activeCandidates.length);
+    const remainder = 100 % activeCandidates.length;
     
     const evenVotes: Record<string, number> = {};
-    candidates.forEach((candidate, index) => {
-      // Add an extra point to the first 'remainder' candidates to handle any leftover points
-      evenVotes[candidate.id] = pointsPerCandidate + (index < remainder ? 1 : 0);
+    candidates.forEach(candidate => {
+      if (candidate.eliminated) {
+        // Keep eliminated candidates at 0
+        evenVotes[candidate.id] = 0;
+      } else {
+        // Find the index of this candidate in the active candidates array
+        const activeIndex = activeCandidates.findIndex(ac => ac.id === candidate.id);
+        // Add an extra point to the first 'remainder' candidates to handle any leftover points
+        evenVotes[candidate.id] = pointsPerCandidate + (activeIndex < remainder ? 1 : 0);
+      }
     });
     
     setVotes(evenVotes);
@@ -226,7 +241,7 @@ export function VotingForm({ userId }: VotingFormProps) {
       <div className="bg-zinc-800/50 rounded-lg p-6 text-center">
         <h3 className="text-xl font-medium text-white mb-2">Geen kandidaten</h3>
         <p className="text-zinc-400">
-          Er zijn geen actieve kandidaten om op te stemmen.
+          Er zijn geen kandidaten om op te stemmen.
         </p>
       </div>
     );
@@ -277,15 +292,29 @@ export function VotingForm({ userId }: VotingFormProps) {
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           {candidates.map(candidate => (
-            <VotingSlider
-              key={candidate.id}
-              candidate={candidate}
-              points={votes[candidate.id] || 0}
-              onChange={handleVoteChange}
-              disabled={isSubmitting || hasExistingVote}
-              maxPoints={100}
-              availablePoints={remainingPoints}
-            />
+            <div key={candidate.id} className={`relative ${candidate.eliminated ? 'opacity-90' : ''}`}>
+              {candidate.eliminated && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-transparent to-red-900/30 z-10 rounded-lg"></div>
+                  <div className="absolute top-0 left-0 w-full h-full z-20 flex items-center justify-center">
+                    <div className="bg-gradient-to-r from-purple-600 to-red-600 text-white px-4 py-2 rounded-lg shadow-lg transform -rotate-3 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Geëlimineerd</span>
+                    </div>
+                  </div>
+                </>
+              )}
+              <VotingSlider
+                candidate={candidate}
+                points={votes[candidate.id] || 0}
+                onChange={handleVoteChange}
+                disabled={isSubmitting || hasExistingVote || candidate.eliminated}
+                maxPoints={100}
+                availablePoints={remainingPoints}
+              />
+            </div>
           ))}
         </div>
         
